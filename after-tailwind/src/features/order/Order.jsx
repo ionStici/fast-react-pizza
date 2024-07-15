@@ -1,27 +1,17 @@
 // Test ID: IIDSAT
 
-import OrderItem from './OrderItem';
-
-import { useFetcher, useLoaderData } from 'react-router-dom';
-import { getOrder } from '../../services/apiRestaurant';
+import { useLoaderData } from "react-router-dom";
+import { getOrder } from "../../services/apiRestaurant";
 import {
   calcMinutesLeft,
   formatCurrency,
   formatDate,
-} from '../../utils/helpers';
-import { useEffect } from 'react';
-import UpdateOrder from './UpdateOrder';
+} from "../../utils/helpers";
+import OrderItem from "./OrderItem";
 
 function Order() {
   const order = useLoaderData();
 
-  const fetcher = useFetcher();
-
-  useEffect(() => {
-    if (!fetcher.data && fetcher.state === 'idle') fetcher.load('/menu');
-  }, [fetcher]);
-
-  // Everyone can search for all orders, so for privacy reasons we're gonna gonna exclude names or address, these are only for the restaurant staff
   const {
     id,
     status,
@@ -31,7 +21,6 @@ function Order() {
     estimatedDelivery,
     cart,
   } = order;
-
   const deliveryIn = calcMinutesLeft(estimatedDelivery);
 
   return (
@@ -51,29 +40,21 @@ function Order() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-stone-200 px-6 py-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-stone-200 px-5 py-5">
         <p className="font-medium">
           {deliveryIn >= 0
             ? `Only ${calcMinutesLeft(estimatedDelivery)} minutes left 😃`
-            : 'Order should have arrived'}
+            : "Order should have arrived"}
         </p>
         <p className="text-xs text-stone-500">
           (Estimated delivery: {formatDate(estimatedDelivery)})
         </p>
       </div>
 
-      <ul className="dive-stone-200 divide-y border-b border-t">
-        {cart.map(item => (
-          <OrderItem
-            item={item}
-            key={item.pizzaId}
-            ingredients={
-              fetcher?.data?.find(el => el.id === item.pizzaId).ingredients ??
-              []
-            }
-            isLoadingIngredients={fetcher.state === 'loading'}
-          />
-        ))}
+      <ul className="divide-y divide-stone-200 border-b border-t">
+        {cart.map((item) => {
+          return <OrderItem item={item} key={item.pizzaId} />;
+        })}
       </ul>
 
       <div className="space-y-2 bg-stone-200 px-6 py-5">
@@ -89,8 +70,6 @@ function Order() {
           To pay on delivery: {formatCurrency(orderPrice + priorityPrice)}
         </p>
       </div>
-
-      {!priority && <UpdateOrder order={order} />}
     </div>
   );
 }
